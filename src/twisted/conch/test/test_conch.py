@@ -145,6 +145,7 @@ class ConchTestOpenSSHProcess(protocol.ProcessProtocol):
 
     deferred = None
     buf = b''
+    problems = b''
 
     def _getDeferred(self):
         d, self.deferred = self.deferred, None
@@ -155,6 +156,10 @@ class ConchTestOpenSSHProcess(protocol.ProcessProtocol):
         self.buf += data
 
 
+    def errReceived(self, data):
+        self.problems += data
+
+
     def processEnded(self, reason):
         """
         Called when the process has ended.
@@ -163,8 +168,13 @@ class ConchTestOpenSSHProcess(protocol.ProcessProtocol):
         """
         if reason.value.exitCode != 0:
             self._getDeferred().errback(
-                ConchError("exit code was not 0: {}".format(
-                                 reason.value.exitCode)))
+                ConchError(
+                    "exit code was not 0: {} ({})".format(
+                        reason.value.exitCode,
+                        self.problems,
+                    )
+                )
+            )
         else:
             buf = self.buf.replace(b'\r\n', b'\n')
             self._getDeferred().callback(buf)
