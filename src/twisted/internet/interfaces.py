@@ -756,7 +756,7 @@ class IReactorTCP(Interface):
 
         @param host: A hostname or an IPv4 or IPv6 address literal.
 
-        @type host: L{bytes}
+        @type host: L{unicode}
 
         @param port: a port number
 
